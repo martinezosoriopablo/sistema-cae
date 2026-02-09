@@ -43,6 +43,14 @@ export const nuevoProfesorSchema = z.object({
   zoom_link: z.string().url('URL de Zoom inválida').optional(),
 })
 
+// Validación de nuevo vendedor
+export const nuevoVendedorSchema = z.object({
+  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  apellido: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  telefono: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos').optional(),
+})
+
 // Validación de marcar clase
 export const marcarClaseSchema = z.object({
   clase_id: z.string().uuid('ID de clase inválido'),
@@ -113,6 +121,7 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type NuevoAlumnoInput = z.infer<typeof nuevoAlumnoSchema>
 export type ActualizarAlumnoInput = z.infer<typeof actualizarAlumnoSchema>
 export type NuevoProfesorInput = z.infer<typeof nuevoProfesorSchema>
+export type NuevoVendedorInput = z.infer<typeof nuevoVendedorSchema>
 export type MarcarClaseInput = z.infer<typeof marcarClaseSchema>
 export type CambioTransitorioInput = z.infer<typeof cambioTransitorioSchema>
 export type AsignarProfesorInput = z.infer<typeof asignarProfesorSchema>

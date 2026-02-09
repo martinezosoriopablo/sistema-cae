@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Mail, Phone, Video, Users, BookOpen } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { DeleteProfesorButton } from '@/components/buttons/DeleteProfesorButton'
 
 export default async function DetalleProfesorPage({
   params,
@@ -56,6 +56,11 @@ export default async function DetalleProfesorPage({
             )}
           </div>
         </div>
+        <DeleteProfesorButton
+          profesorId={profesor.id}
+          profesorName={`${profesor.nombre} ${profesor.apellido}`}
+          alumnosCount={alumnos?.length || 0}
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

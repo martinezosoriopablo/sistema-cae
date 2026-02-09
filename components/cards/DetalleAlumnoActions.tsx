@@ -25,6 +25,7 @@ import { Lock, Unlock, UserPlus, Loader2, Clock, PlusCircle, Edit } from 'lucide
 import { FormEditarHorarios } from '@/components/forms/FormEditarHorarios'
 import { FormAgregarHoras } from '@/components/forms/FormAgregarHoras'
 import { FormEditarAlumno } from '@/components/forms/FormEditarAlumno'
+import { DeleteAlumnoButton } from '@/components/buttons/DeleteAlumnoButton'
 import { toast } from 'sonner'
 import { Alumno, Profesor } from '@/types'
 
@@ -281,6 +282,12 @@ export function DetalleAlumnoActions({ alumno, profesores }: DetalleAlumnoAction
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Eliminar Alumno */}
+      <DeleteAlumnoButton
+        alumnoId={alumno.id}
+        alumnoName={`${alumno.nombre} ${alumno.apellido}`}
+      />
     </div>
   )
 }
