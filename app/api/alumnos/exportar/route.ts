@@ -49,8 +49,11 @@ export async function GET(request: NextRequest) {
 
     // Formatear datos para Excel
     const datosExcel = alumnos?.map((alumno) => {
-      const profesor = alumno.profesor as { nombre: string; apellido: string } | null
-      const vendedor = alumno.vendedor as { nombre: string; apellido: string } | null
+      // Supabase puede retornar relaciones como array o como objeto
+      const profesorData = Array.isArray(alumno.profesor) ? alumno.profesor[0] : alumno.profesor
+      const vendedorData = Array.isArray(alumno.vendedor) ? alumno.vendedor[0] : alumno.vendedor
+      const profesor = profesorData as { nombre: string; apellido: string } | null
+      const vendedor = vendedorData as { nombre: string; apellido: string } | null
       return {
         Nombre: alumno.nombre,
         Apellido: alumno.apellido,

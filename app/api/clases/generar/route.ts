@@ -84,7 +84,9 @@ export async function POST(request: NextRequest) {
       if (!alumno.horarios || !alumno.profesor) continue
 
       const horariosActivos = alumno.horarios.filter((h: any) => h.activo)
-      const profesor = alumno.profesor as { id: string; zoom_link: string | null }
+      // Supabase puede retornar relaciones como array o como objeto
+      const profesorData = Array.isArray(alumno.profesor) ? alumno.profesor[0] : alumno.profesor
+      const profesor = profesorData as { id: string; zoom_link: string | null }
 
       for (const horario of horariosActivos) {
         const diaNumero = diasSemana[horario.dia]
