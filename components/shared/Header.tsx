@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { getInitials } from '@/lib/utils'
 import { LogOut, Menu, User } from 'lucide-react'
+import Link from 'next/link'
 
 interface HeaderProps {
   nombre: string
@@ -67,9 +68,11 @@ export function Header({ nombre, apellido, email, onMenuClick }: HeaderProps) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Mi perfil</span>
+          <DropdownMenuItem asChild>
+            <Link href="/perfil" className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span>Mi perfil</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>

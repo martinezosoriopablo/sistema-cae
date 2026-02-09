@@ -1,10 +1,11 @@
 import { requireRole } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { formatDate, formatTime } from '@/lib/utils'
-import { Video, Calendar, Clock, AlertTriangle } from 'lucide-react'
+import { Calendar, AlertTriangle } from 'lucide-react'
+import { ClaseActiva } from '@/components/alumno/ClaseActiva'
+import { CalendarioClases } from '@/components/alumno/CalendarioClases'
+import { DescargarCalendario } from '@/components/alumno/DescargarCalendario'
 
 export default async function MiClasePage() {
   const session = await requireRole(['alumno'])
@@ -41,40 +42,23 @@ export default async function MiClasePage() {
     )
   }
 
-  // Obtener próxima clase
-  const hoy = new Date().toISOString().split('T')[0]
-  const { data: proximaClase } = await supabase
+  // Obtener clases del mes actual y siguiente
+  const hoy = new Date()
+  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+  const ultimoDiaProxMes = new Date(hoy.getFullYear(), hoy.getMonth() + 2, 0)
+
+  const { data: clases } = await supabase
     .from('clases')
     .select('*')
     .eq('alumno_id', alumno.id)
-    .eq('estado', 'programada')
-    .gte('fecha', hoy)
+    .gte('fecha', primerDiaMes.toISOString().split('T')[0])
+    .lte('fecha', ultimoDiaProxMes.toISOString().split('T')[0])
     .order('fecha')
     .order('hora_inicio')
-    .limit(1)
-    .single()
 
   // Clase de hoy
-  const ahora = new Date()
-  const horaActual = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`
-
-  const { data: claseHoy } = await supabase
-    .from('clases')
-    .select('*')
-    .eq('alumno_id', alumno.id)
-    .eq('fecha', hoy)
-    .eq('estado', 'programada')
-    .single()
-
-  // Verificar si la clase está próxima (30 min antes hasta fin)
-  const claseActiva = claseHoy && (() => {
-    const [hInicio, mInicio] = claseHoy.hora_inicio.split(':').map(Number)
-    const [hFin, mFin] = claseHoy.hora_fin.split(':').map(Number)
-    const minutosActual = ahora.getHours() * 60 + ahora.getMinutes()
-    const minutosInicio = hInicio * 60 + mInicio - 30 // 30 min antes
-    const minutosFin = hFin * 60 + mFin
-    return minutosActual >= minutosInicio && minutosActual <= minutosFin
-  })()
+  const fechaHoy = hoy.toISOString().split('T')[0]
+  const claseHoy = clases?.find(c => c.fecha === fechaHoy && c.estado === 'programada')
 
   return (
     <div className="space-y-6">
@@ -100,89 +84,31 @@ export default async function MiClasePage() {
         </Card>
       )}
 
-      {/* Clase activa */}
-      {claseActiva && alumno.profesor?.zoom_link && (
-        <Card className="border-2 border-green-500 bg-green-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-700">
-              <Video className="h-5 w-5" />
-              Clase en Progreso
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4 text-green-700">
-              <Clock className="h-5 w-5" />
-              <span>
-                {formatTime(claseHoy!.hora_inicio)} - {formatTime(claseHoy!.hora_fin)}
-              </span>
-            </div>
-            <a
-              href={alumno.profesor.zoom_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
-                <Video className="h-5 w-5 mr-2" />
-                Unirse Ahora
-              </Button>
-            </a>
-          </CardContent>
-        </Card>
+      {/* Clase de hoy */}
+      {claseHoy && (
+        <ClaseActiva
+          clase={claseHoy}
+          zoomLink={alumno.profesor?.zoom_link || null}
+          profesorNombre={alumno.profesor ? `${alumno.profesor.nombre} ${alumno.profesor.apellido}` : null}
+        />
       )}
 
-      {/* Próxima clase */}
+      {/* Calendario de clases */}
       <Card>
-        <CardHeader>
-          <CardTitle>Próxima Clase Programada</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Mis Clases Programadas
+          </CardTitle>
+          <DescargarCalendario
+            totalClases={clases?.filter(c => c.estado === 'programada').length || 0}
+          />
         </CardHeader>
         <CardContent>
-          {proximaClase ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-muted rounded-full">
-                  <Calendar className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-lg font-medium">
-                    {formatDate(proximaClase.fecha, "EEEE d 'de' MMMM")}
-                  </p>
-                  <p className="text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {formatTime(proximaClase.hora_inicio)} - {formatTime(proximaClase.hora_fin)}
-                  </p>
-                </div>
-              </div>
-
-              {alumno.profesor && (
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-muted-foreground">Profesor</p>
-                  <p className="font-medium">
-                    {alumno.profesor.nombre} {alumno.profesor.apellido}
-                  </p>
-                </div>
-              )}
-
-              {!claseActiva && alumno.profesor?.zoom_link && (
-                <div className="pt-4">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    El enlace estará disponible 30 minutos antes de la clase
-                  </p>
-                  <Button variant="outline" disabled className="w-full">
-                    <Video className="h-4 w-4 mr-2" />
-                    Unirse a la Clase
-                  </Button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                No hay clases programadas próximamente
-              </p>
-            </div>
-          )}
+          <CalendarioClases
+            clases={clases || []}
+            zoomLink={alumno.profesor?.zoom_link || null}
+          />
         </CardContent>
       </Card>
 

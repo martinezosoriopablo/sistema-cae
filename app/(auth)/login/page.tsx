@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -118,6 +119,15 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
+
+            <div className="text-right">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-primary hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
 
             {error && (
               <p className="text-sm text-destructive text-center">{error}</p>

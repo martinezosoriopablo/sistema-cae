@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate, formatTime, formatHorasRestantes } from '@/lib/utils'
 import { DIAS_SEMANA, UMBRAL_ALERTA_HORAS } from '@/lib/constants'
-import { Clock, Calendar, Video, AlertTriangle, BookOpen } from 'lucide-react'
+import { Clock, Calendar, Video, AlertTriangle, BookOpen, CalendarDays } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function AlumnoDashboard() {
@@ -214,6 +214,12 @@ export default async function AlumnoDashboard() {
             <CardTitle>Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
+            <Link href="/alumno/mi-clase">
+              <Button variant="outline" className="w-full justify-start">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Ver Calendario de Clases
+              </Button>
+            </Link>
             <Link href="/alumno/historial">
               <Button variant="outline" className="w-full justify-start">
                 <Calendar className="h-4 w-4 mr-2" />

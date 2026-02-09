@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { DIAS_SEMANA } from '@/lib/constants'
 import { formatDate, formatTime } from '@/lib/utils'
 import { Calendar, Clock } from 'lucide-react'
+import { GenerarClasesButton } from '@/components/admin/GenerarClasesButton'
 
 export default async function HorariosPage() {
   await requireRole(['admin'])
@@ -53,11 +54,14 @@ export default async function HorariosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Gestión de Horarios</h1>
-        <p className="text-muted-foreground">
-          Vista general de clases programadas
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Gestión de Horarios</h1>
+          <p className="text-muted-foreground">
+            Vista general de clases programadas
+          </p>
+        </div>
+        <GenerarClasesButton />
       </div>
 
       {/* Clases de hoy */}
