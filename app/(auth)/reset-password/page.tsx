@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -24,7 +25,7 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
@@ -262,5 +263,23 @@ export default function ResetPasswordPage() {
         </Form>
       </CardContent>
     </Card>
+  )
+}
+
+function LoadingCard() {
+  return (
+    <Card className="shadow-xl border-t-4 border-t-primary">
+      <CardContent className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingCard />}>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }
