@@ -49,10 +49,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Agregar información del profesor a cada clase
+    // Supabase puede retornar el profesor como array o como objeto
+    const profesorData = Array.isArray(alumno.profesor)
+      ? alumno.profesor[0]
+      : alumno.profesor
+
     const clasesConProfesor = clases.map(clase => ({
       ...clase,
-      profesor: alumno.profesor as { nombre: string; apellido: string } | null,
-      zoom_link: clase.zoom_link || (alumno.profesor as any)?.zoom_link || null,
+      profesor: profesorData as { nombre: string; apellido: string } | null,
+      zoom_link: clase.zoom_link || (profesorData as any)?.zoom_link || null,
     }))
 
     // Generar eventos
