@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { MENU_POR_ROL } from '@/lib/constants'
@@ -42,10 +43,15 @@ export function Sidebar({ rol }: SidebarProps) {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-[#1F428D]">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex items-center h-16 flex-shrink-0 px-4 bg-[#162f64]">
-          <Link href={`/${rol}`} className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-white">TalkChile</span>
+        <div className="flex items-center justify-center h-20 flex-shrink-0 px-4 bg-white">
+          <Link href={`/${rol}`}>
+            <Image
+              src="/logo-talkchile.png"
+              alt="TalkChile Logo"
+              width={160}
+              height={50}
+              priority
+            />
           </Link>
         </div>
         <nav className="flex-1 px-2 py-4 space-y-1">

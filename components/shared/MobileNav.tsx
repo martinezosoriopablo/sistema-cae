@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { MENU_POR_ROL } from '@/lib/constants'
@@ -52,16 +53,22 @@ export function MobileNav({ rol, open, onClose }: MobileNavProps) {
       )}
     >
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="fixed inset-y-0 left-0 w-64 bg-[#1F428D] p-4">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-white">TalkChile</span>
-          </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-white">
+      <div className="fixed inset-y-0 left-0 w-64 bg-[#1F428D] flex flex-col">
+        <div className="flex items-center justify-between p-3 bg-white">
+          <Link href={`/${rol}`} onClick={onClose}>
+            <Image
+              src="/logo-talkchile.png"
+              alt="TalkChile Logo"
+              width={140}
+              height={45}
+              priority
+            />
+          </Link>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-600">
             <X className="h-5 w-5" />
           </Button>
         </div>
+        <div className="flex-1 p-4">
         <nav className="space-y-1">
           {menuItems.map((item) => {
             const Icon = iconMap[item.icon]
@@ -103,6 +110,7 @@ export function MobileNav({ rol, open, onClose }: MobileNavProps) {
             </Link>
           </div>
         </nav>
+        </div>
       </div>
     </div>
   )
