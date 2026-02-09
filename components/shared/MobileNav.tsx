@@ -52,7 +52,7 @@ export function MobileNav({ rol, open, onClose }: MobileNavProps) {
       )}
     >
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="fixed inset-y-0 left-0 w-64 bg-gray-900 p-4">
+      <div className="fixed inset-y-0 left-0 w-64 bg-[#1F428D] p-4">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-8 w-8 text-primary" />
@@ -76,8 +76,8 @@ export function MobileNav({ rol, open, onClose }: MobileNavProps) {
                 className={cn(
                   'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                   isActive
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ? 'bg-[#162f64] text-white'
+                    : 'text-blue-100 hover:bg-[#2d5aa8] hover:text-white'
                 )}
               >
                 {Icon && <Icon className="mr-3 h-5 w-5 flex-shrink-0" />}
@@ -87,15 +87,15 @@ export function MobileNav({ rol, open, onClose }: MobileNavProps) {
           })}
 
           {/* Separador y enlace a perfil */}
-          <div className="pt-4 mt-4 border-t border-gray-700">
+          <div className="pt-4 mt-4 border-t border-blue-400/30">
             <Link
               href="/perfil"
               onClick={onClose}
               className={cn(
                 'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                 pathname === '/perfil'
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  ? 'bg-[#162f64] text-white'
+                  : 'text-blue-100 hover:bg-[#2d5aa8] hover:text-white'
               )}
             >
               <User className="mr-3 h-5 w-5 flex-shrink-0" />
