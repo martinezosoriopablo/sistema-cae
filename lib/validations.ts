@@ -14,6 +14,7 @@ export const nuevoAlumnoSchema = z.object({
   telefono: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos'),
   rut: z.string().optional(),
   nivel_actual: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']),
+  modalidad: z.enum(['privado', 'livemode', 'kids', 'presencial', 'espanol', 'nativo']),
   horas_contratadas: z.number().min(1, 'Debe contratar al menos 1 hora').max(500, 'Máximo 500 horas'),
   horarios: z.array(z.object({
     dia: z.enum(['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']),
@@ -28,6 +29,7 @@ export const actualizarAlumnoSchema = z.object({
   apellido: z.string().min(2, 'El apellido debe tener al menos 2 caracteres').optional(),
   telefono: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos').optional(),
   nivel_actual: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']).optional(),
+  modalidad: z.enum(['privado', 'livemode', 'kids', 'presencial', 'espanol', 'nativo']).optional(),
   horas_contratadas: z.number().min(1).max(500).optional(),
   horas_restantes: z.number().min(0).optional(),
   notas: z.string().optional(),
@@ -41,6 +43,15 @@ export const nuevoProfesorSchema = z.object({
   telefono: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos').optional(),
   especialidades: z.array(z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'])).optional(),
   zoom_link: z.string().url('URL de Zoom inválida').optional(),
+})
+
+// Validación de actualización de profesor
+export const actualizarProfesorSchema = z.object({
+  nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional(),
+  apellido: z.string().min(2, 'El apellido debe tener al menos 2 caracteres').optional(),
+  telefono: z.string().min(9, 'El teléfono debe tener al menos 9 dígitos').optional(),
+  especialidades: z.array(z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'])).optional(),
+  zoom_link: z.string().url('URL de Zoom inválida').optional().or(z.literal('')),
 })
 
 // Validación de nuevo vendedor
@@ -103,6 +114,7 @@ export const filaAlumnoExcelSchema = z.object({
   telefono: z.string().min(9, 'Telefono requerido'),
   rut: z.string().optional(),
   nivel_actual: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']).optional().default('A1'),
+  modalidad: z.enum(['privado', 'livemode', 'kids', 'presencial', 'espanol', 'nativo']).optional().default('privado'),
   horas_contratadas: z.number().min(1).max(500).optional().default(10),
 })
 
@@ -112,7 +124,7 @@ export const filaProfesorExcelSchema = z.object({
   apellido: z.string().min(2, 'Apellido requerido'),
   email: z.string().email('Email invalido'),
   telefono: z.string().optional(),
-  especialidades: z.string().optional(),
+  especialidades: z.array(z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'])).optional(),
   zoom_link: z.string().url().optional(),
 })
 
@@ -121,6 +133,7 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type NuevoAlumnoInput = z.infer<typeof nuevoAlumnoSchema>
 export type ActualizarAlumnoInput = z.infer<typeof actualizarAlumnoSchema>
 export type NuevoProfesorInput = z.infer<typeof nuevoProfesorSchema>
+export type ActualizarProfesorInput = z.infer<typeof actualizarProfesorSchema>
 export type NuevoVendedorInput = z.infer<typeof nuevoVendedorSchema>
 export type MarcarClaseInput = z.infer<typeof marcarClaseSchema>
 export type CambioTransitorioInput = z.infer<typeof cambioTransitorioSchema>

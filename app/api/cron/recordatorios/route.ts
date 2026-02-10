@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail, getClassReminderEmail } from '@/lib/email'
 import { formatDate, formatTime } from '@/lib/utils'
@@ -6,12 +7,26 @@ import { formatDate, formatTime } from '@/lib/utils'
 // Este endpoint debe ser llamado cada minuto por un servicio de cron externo
 // Por ejemplo: Vercel Cron, Railway Cron, o cron-job.org
 export async function GET(request: NextRequest) {
-  // Verificar autorización
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
   if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData || userData.rol !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
   }
 
   const adminClient = createAdminClient()

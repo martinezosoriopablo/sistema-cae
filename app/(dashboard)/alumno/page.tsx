@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { formatDate, formatTime, formatHorasRestantes } from '@/lib/utils'
 import { DIAS_SEMANA, UMBRAL_ALERTA_HORAS } from '@/lib/constants'
 import { Clock, Calendar, Video, AlertTriangle, BookOpen, CalendarDays } from 'lucide-react'
+import { HorarioAlumno } from '@/types'
 import Link from 'next/link'
 
 export default async function AlumnoDashboard() {
@@ -186,8 +187,8 @@ export default async function AlumnoDashboard() {
             {alumno.horarios && alumno.horarios.length > 0 ? (
               <div className="space-y-2">
                 {alumno.horarios
-                  .filter((h: any) => h.activo)
-                  .map((horario: any) => {
+                  .filter((h: HorarioAlumno) => h.activo)
+                  .map((horario: HorarioAlumno) => {
                     const dia = DIAS_SEMANA.find(d => d.value === horario.dia)
                     return (
                       <div

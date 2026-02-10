@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatTime } from '@/lib/utils'
-import { Video, Clock, Loader2, CheckCircle } from 'lucide-react'
+import { Video, Clock, Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { CancelarClaseDialog } from './CancelarClaseDialog'
+import { HORAS_MINIMAS_CANCELACION } from '@/lib/constants'
 
 interface Clase {
   id: string
@@ -28,6 +30,8 @@ export function ClaseActiva({ clase, zoomLink, profesorNombre }: ClaseActivaProp
   const [isJoining, setIsJoining] = useState(false)
   const [joined, setJoined] = useState(false)
   const [canJoin, setCanJoin] = useState(false)
+  const [canCancel, setCanCancel] = useState(false)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [timeUntilClass, setTimeUntilClass] = useState('')
 
   useEffect(() => {
@@ -49,6 +53,10 @@ export function ClaseActiva({ clase, zoomLink, profesorNombre }: ClaseActivaProp
 
       const puedeUnirse = ahora >= fechaPermitida && ahora <= fechaLimite
       setCanJoin(puedeUnirse)
+
+      // Puede cancelar si faltan más de X horas
+      const horasRestantes = (fechaInicio.getTime() - ahora.getTime()) / (1000 * 60 * 60)
+      setCanCancel(horasRestantes >= HORAS_MINIMAS_CANCELACION && clase.estado === 'programada')
 
       // Calcular tiempo restante
       if (ahora < fechaPermitida) {
@@ -96,7 +104,7 @@ export function ClaseActiva({ clase, zoomLink, profesorNombre }: ClaseActivaProp
       }
 
       setJoined(true)
-      toast.success('Clase marcada como completada')
+      toast.success('Conectando a la clase')
 
       // Abrir Zoom
       const link = data.zoom_link || zoomLink
@@ -174,6 +182,24 @@ export function ClaseActiva({ clase, zoomLink, profesorNombre }: ClaseActivaProp
             {!zoomLink ? 'Sin enlace de Zoom configurado' : 'Enlace disponible pronto'}
           </Button>
         )}
+
+        {canCancel && (
+          <Button
+            variant="outline"
+            className="w-full text-destructive border-destructive/50 hover:bg-destructive/10"
+            onClick={() => setCancelDialogOpen(true)}
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Cancelar Clase
+          </Button>
+        )}
+
+        <CancelarClaseDialog
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          clase={clase}
+          profesorNombre={profesorNombre ?? undefined}
+        />
       </CardContent>
     </Card>
   )

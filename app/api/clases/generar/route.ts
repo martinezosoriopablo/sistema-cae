@@ -1,28 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // Genera clases para los próximos N días basado en los horarios de los alumnos
 export async function POST(request: NextRequest) {
-  const adminClient = createAdminClient()
-
   // Verificar autorización (puede ser cron o admin)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  // Si no es cron, verificar que sea admin
+  // Si no es cron, verificar que sea un usuario admin autenticado
   if (authHeader !== `Bearer ${cronSecret}`) {
-    const { data: { user } } = await adminClient.auth.getUser(
-      request.headers.get('cookie')?.split('sb-')[1]?.split('=')[1] || ''
-    )
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      // Intentar obtener del body para llamadas internas
-      const body = await request.json().catch(() => ({}))
-      if (body.secret !== cronSecret) {
-        return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-      }
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    // Verificar que sea admin
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData || userData.rol !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
   }
+
+  const adminClient = createAdminClient()
 
   try {
     const body = await request.json().catch(() => ({}))
@@ -83,7 +90,7 @@ export async function POST(request: NextRequest) {
     for (const alumno of alumnos || []) {
       if (!alumno.horarios || !alumno.profesor) continue
 
-      const horariosActivos = alumno.horarios.filter((h: any) => h.activo)
+      const horariosActivos = alumno.horarios.filter((h: { activo: boolean }) => h.activo)
       // Supabase puede retornar relaciones como array o como objeto
       const profesorData = Array.isArray(alumno.profesor) ? alumno.profesor[0] : alumno.profesor
       const profesor = profesorData as { id: string; zoom_link: string | null }

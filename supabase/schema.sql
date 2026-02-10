@@ -13,6 +13,7 @@ CREATE TYPE estado_clase AS ENUM ('programada', 'completada', 'cancelada', 'no_a
 CREATE TYPE dia_semana AS ENUM ('lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo');
 CREATE TYPE tipo_alerta AS ENUM ('pocas_horas', 'sin_profesor', 'clase_perdida');
 CREATE TYPE tipo_material AS ENUM ('documento', 'video', 'audio', 'ejercicio');
+CREATE TYPE modalidad_curso AS ENUM ('privado', 'livemode', 'kids', 'presencial', 'espanol', 'nativo');
 
 -- Tabla de usuarios (extiende auth.users)
 CREATE TABLE usuarios (
@@ -51,8 +52,9 @@ CREATE TABLE alumnos (
   telefono TEXT NOT NULL,
   rut TEXT,
   nivel_actual nivel_mcer NOT NULL DEFAULT 'A1',
-  horas_contratadas NUMERIC(6,2) NOT NULL DEFAULT 0,
-  horas_restantes NUMERIC(6,2) NOT NULL DEFAULT 0,
+  modalidad modalidad_curso NOT NULL DEFAULT 'privado',
+  horas_contratadas NUMERIC(6,2) NOT NULL DEFAULT 0 CHECK (horas_contratadas >= 0),
+  horas_restantes NUMERIC(6,2) NOT NULL DEFAULT 0 CHECK (horas_restantes >= 0),
   profesor_id UUID REFERENCES profesores(id) ON DELETE SET NULL,
   vendedor_id UUID NOT NULL REFERENCES usuarios(id),
   bloqueado BOOLEAN DEFAULT FALSE,
@@ -71,9 +73,10 @@ CREATE TABLE horarios_alumnos (
   dia dia_semana NOT NULL,
   hora_inicio TIME NOT NULL,
   hora_fin TIME NOT NULL,
-  duracion_minutos INTEGER NOT NULL DEFAULT 60,
+  duracion_minutos INTEGER NOT NULL DEFAULT 60 CHECK (duracion_minutos > 0),
   activo BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CHECK (hora_fin > hora_inicio)
 );
 
 -- Tabla de cambios transitorios de horario
@@ -96,7 +99,7 @@ CREATE TABLE clases (
   fecha DATE NOT NULL,
   hora_inicio TIME NOT NULL,
   hora_fin TIME NOT NULL,
-  duracion_minutos INTEGER NOT NULL DEFAULT 60,
+  duracion_minutos INTEGER NOT NULL DEFAULT 60 CHECK (duracion_minutos > 0),
   estado estado_clase NOT NULL DEFAULT 'programada',
   notas_profesor TEXT,
   zoom_link TEXT,
@@ -130,12 +133,13 @@ CREATE TABLE materiales (
 CREATE TABLE pagos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   alumno_id UUID NOT NULL REFERENCES alumnos(id) ON DELETE CASCADE,
-  monto NUMERIC(10,2) NOT NULL,
-  horas_compradas NUMERIC(6,2) NOT NULL,
+  monto NUMERIC(10,2) NOT NULL CHECK (monto > 0),
+  horas_compradas NUMERIC(6,2) NOT NULL CHECK (horas_compradas > 0),
   fecha_pago DATE NOT NULL DEFAULT CURRENT_DATE,
   metodo_pago TEXT NOT NULL,
   comprobante_url TEXT,
   vendedor_id UUID NOT NULL REFERENCES usuarios(id),
+  tarifa_hora NUMERIC(10,2),
   notas TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -153,19 +157,25 @@ CREATE INDEX idx_profesores_user_id ON profesores(user_id);
 CREATE INDEX idx_alumnos_vendedor ON alumnos(vendedor_id);
 CREATE INDEX idx_alumnos_profesor ON alumnos(profesor_id);
 CREATE INDEX idx_alumnos_bloqueado ON alumnos(bloqueado);
+CREATE INDEX idx_alumnos_modalidad ON alumnos(modalidad);
 CREATE INDEX idx_alumnos_horas ON alumnos(horas_restantes);
+CREATE INDEX idx_alumnos_vendedor_bloqueado ON alumnos(vendedor_id, bloqueado);
 
 CREATE INDEX idx_horarios_alumno ON horarios_alumnos(alumno_id);
 CREATE INDEX idx_horarios_dia ON horarios_alumnos(dia);
+CREATE INDEX idx_horarios_alumno_activo ON horarios_alumnos(alumno_id, activo);
 
 CREATE INDEX idx_clases_alumno ON clases(alumno_id);
 CREATE INDEX idx_clases_profesor ON clases(profesor_id);
 CREATE INDEX idx_clases_fecha ON clases(fecha);
 CREATE INDEX idx_clases_estado ON clases(estado);
+CREATE INDEX idx_clases_alumno_fecha ON clases(alumno_id, fecha);
+CREATE INDEX idx_clases_fecha_estado ON clases(fecha, estado);
 
 CREATE INDEX idx_alertas_destinatario ON alertas(destinatario_id);
 CREATE INDEX idx_alertas_leida ON alertas(leida);
 CREATE INDEX idx_alertas_alumno ON alertas(alumno_id);
+CREATE INDEX idx_alertas_destinatario_leida ON alertas(destinatario_id, leida);
 
 CREATE INDEX idx_materiales_nivel ON materiales(nivel);
 

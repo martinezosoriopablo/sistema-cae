@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getDiaSemana, calcularDuracion } from '@/lib/utils'
 
@@ -6,10 +7,26 @@ import { getDiaSemana, calcularDuracion } from '@/lib/utils'
 // Debe ejecutarse semanalmente (ej: domingo a las 00:00)
 
 export async function POST(request: NextRequest) {
-  // Verificar CRON_SECRET
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const cronSecret = process.env.CRON_SECRET
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData || userData.rol !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
   }
 
   const supabase = createAdminClient()
@@ -45,7 +62,7 @@ export async function POST(request: NextRequest) {
       for (const alumno of alumnos || []) {
         // Buscar si tiene clase programada para este día
         const horarioDia = alumno.horarios?.find(
-          (h: any) => h.dia === diaSemana && h.activo
+          (h: { dia: string; hora_inicio: string; hora_fin: string; duracion_minutos: number; activo: boolean }) => h.dia === diaSemana && h.activo
         )
 
         if (horarioDia) {

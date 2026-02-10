@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-// Marca la clase como completada y descuenta horas al alumno
+// El alumno se une a la clase: solo verifica acceso y devuelve el link de Zoom
+// El descuento de horas lo hace el profesor al marcar la clase
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,12 +18,13 @@ export async function POST(
   }
 
   try {
-    // Obtener la clase
+    // Obtener la clase con datos del alumno
     const { data: clase, error: claseError } = await adminClient
       .from('clases')
       .select(`
         *,
-        alumno:alumnos(id, user_id, horas_restantes)
+        alumno:alumnos(id, user_id),
+        profesor:profesores(nombre, apellido)
       `)
       .eq('id', id)
       .single()
@@ -31,30 +33,28 @@ export async function POST(
       return NextResponse.json({ error: 'Clase no encontrada' }, { status: 404 })
     }
 
-    const alumno = clase.alumno as { id: string; user_id: string; horas_restantes: number }
+    const alumno = clase.alumno as { id: string; user_id: string }
 
     // Verificar que el usuario es el alumno de esta clase
     if (alumno.user_id !== user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
     }
 
-    // Verificar que la clase no está ya completada
-    if (clase.estado === 'completada') {
+    // Verificar que la clase no fue cancelada
+    if (clase.estado === 'cancelada') {
       return NextResponse.json({
-        success: true,
-        mensaje: 'La clase ya fue marcada como completada',
-        zoom_link: clase.zoom_link,
-      })
+        error: 'Esta clase fue cancelada',
+        puedeUnirse: false,
+      }, { status: 400 })
     }
 
-    // Verificar que es el día de la clase (con margen de 30 min antes)
+    // Verificar ventana de tiempo (30 min antes a 15 min después de terminar)
     const ahora = new Date()
     const fechaClase = new Date(`${clase.fecha}T${clase.hora_inicio}`)
-    const margenMinutos = 30
-    fechaClase.setMinutes(fechaClase.getMinutes() - margenMinutos)
+    fechaClase.setMinutes(fechaClase.getMinutes() - 30)
 
     const fechaFinClase = new Date(`${clase.fecha}T${clase.hora_fin}`)
-    fechaFinClase.setMinutes(fechaFinClase.getMinutes() + 15) // 15 min después de terminar
+    fechaFinClase.setMinutes(fechaFinClase.getMinutes() + 15)
 
     if (ahora < fechaClase) {
       return NextResponse.json({
@@ -71,42 +71,16 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // Calcular horas a descontar
-    const horasClase = clase.duracion_minutos / 60
-
-    // Actualizar clase como completada
-    const { error: updateClaseError } = await adminClient
-      .from('clases')
-      .update({
-        estado: 'completada',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-
-    if (updateClaseError) {
-      throw updateClaseError
-    }
-
-    // Descontar horas al alumno
-    const nuevasHoras = Math.max(0, alumno.horas_restantes - horasClase)
-    const { error: updateAlumnoError } = await adminClient
-      .from('alumnos')
-      .update({
-        horas_restantes: nuevasHoras,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', alumno.id)
-
-    if (updateAlumnoError) {
-      throw updateAlumnoError
-    }
-
     return NextResponse.json({
       success: true,
-      mensaje: 'Clase marcada como completada',
       zoom_link: clase.zoom_link,
-      horasDescontadas: horasClase,
-      horasRestantes: nuevasHoras,
+      puedeUnirse: true,
+      clase: {
+        fecha: clase.fecha,
+        hora_inicio: clase.hora_inicio,
+        hora_fin: clase.hora_fin,
+        estado: clase.estado,
+      },
     })
   } catch (error) {
     console.error('Error al unirse a clase:', error)

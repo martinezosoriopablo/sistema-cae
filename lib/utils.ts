@@ -26,7 +26,11 @@ export function formatTime(time: string): string {
 export function calcularDuracion(horaInicio: string, horaFin: string): number {
   const [hI, mI] = horaInicio.split(":").map(Number)
   const [hF, mF] = horaFin.split(":").map(Number)
-  return (hF * 60 + mF) - (hI * 60 + mI)
+  const duracion = (hF * 60 + mF) - (hI * 60 + mI)
+  if (duracion <= 0) {
+    throw new Error(`Hora de fin (${horaFin}) debe ser posterior a hora de inicio (${horaInicio})`)
+  }
+  return duracion
 }
 
 // Convertir minutos a formato de horas legible

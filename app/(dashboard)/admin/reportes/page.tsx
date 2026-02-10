@@ -2,6 +2,7 @@ import { requireRole } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { MODALIDADES_CURSO } from '@/lib/constants'
 import { BarChart, Users, Clock, TrendingUp } from 'lucide-react'
 
 export default async function ReportesPage() {
@@ -47,6 +48,16 @@ export default async function ReportesPage() {
 
   const distribucionNivel = alumnosPorNivel?.reduce((acc, curr) => {
     acc[curr.nivel_actual] = (acc[curr.nivel_actual] || 0) + 1
+    return acc
+  }, {} as Record<string, number>) || {}
+
+  // Alumnos por modalidad
+  const { data: alumnosPorModalidad } = await supabase
+    .from('alumnos')
+    .select('modalidad')
+
+  const distribucionModalidad = alumnosPorModalidad?.reduce((acc, curr) => {
+    acc[curr.modalidad] = (acc[curr.modalidad] || 0) + 1
     return acc
   }, {} as Record<string, number>) || {}
 
@@ -135,6 +146,37 @@ export default async function ReportesPage() {
                   <div key={nivel} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{nivel}</span>
+                      <span className="text-muted-foreground">
+                        {cantidad} alumnos ({porcentaje}%)
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${porcentaje}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Distribución por modalidad */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribución por Modalidad</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {MODALIDADES_CURSO.map((modalidad) => {
+                const cantidad = distribucionModalidad[modalidad.value] || 0
+                const porcentaje = totalAlumnos ? Math.round((cantidad / totalAlumnos!) * 100) : 0
+                return (
+                  <div key={modalidad.value} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{modalidad.label}</span>
                       <span className="text-muted-foreground">
                         {cantidad} alumnos ({porcentaje}%)
                       </span>

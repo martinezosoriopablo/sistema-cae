@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatDate, formatHorasRestantes, formatTime } from '@/lib/utils'
-import { DIAS_SEMANA, NIVELES_MCER } from '@/lib/constants'
+import { DIAS_SEMANA, MODALIDADES_CURSO, NIVELES_MCER } from '@/lib/constants'
 import { DetalleAlumnoActions } from '@/components/cards/DetalleAlumnoActions'
 import { Mail, Phone, Calendar, Clock, User, GraduationCap } from 'lucide-react'
+import { HorarioAlumno } from '@/types'
 
 export default async function DetalleAlumnoPage({
   params,
@@ -48,6 +49,7 @@ export default async function DetalleAlumnoPage({
     .limit(10)
 
   const nivelInfo = NIVELES_MCER.find(n => n.value === alumno.nivel_actual)
+  const modalidadInfo = MODALIDADES_CURSO.find(m => m.value === alumno.modalidad)
 
   return (
     <div className="space-y-6">
@@ -113,9 +115,15 @@ export default async function DetalleAlumnoPage({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Nivel MCER</p>
-              <p className="font-medium">{nivelInfo?.label}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Nivel MCER</p>
+                <p className="font-medium">{nivelInfo?.label}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Modalidad</p>
+                <Badge variant="outline">{modalidadInfo?.label || alumno.modalidad}</Badge>
+              </div>
             </div>
             <Separator />
             <div className="grid grid-cols-2 gap-4">
@@ -158,8 +166,8 @@ export default async function DetalleAlumnoPage({
             {alumno.horarios && alumno.horarios.length > 0 ? (
               <div className="space-y-2">
                 {alumno.horarios
-                  .filter((h: any) => h.activo)
-                  .map((horario: any) => {
+                  .filter((h: HorarioAlumno) => h.activo)
+                  .map((horario: HorarioAlumno) => {
                     const dia = DIAS_SEMANA.find(d => d.value === horario.dia)
                     return (
                       <div

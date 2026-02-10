@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
+const bodySchema = z.object({
+  profesor_id: z.string().uuid('ID de profesor inválido'),
+})
 
 export async function PUT(
   request: NextRequest,
@@ -24,14 +29,17 @@ export async function PUT(
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
-  const { profesor_id } = await request.json()
+  const body = await request.json()
+  const validated = bodySchema.safeParse(body)
 
-  if (!profesor_id) {
+  if (!validated.success) {
     return NextResponse.json(
-      { error: 'ID de profesor requerido' },
+      { error: validated.error.issues[0].message },
       { status: 400 }
     )
   }
+
+  const { profesor_id } = validated.data
 
   // Verificar que el profesor existe
   const { data: profesor } = await supabase

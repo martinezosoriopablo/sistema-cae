@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { formatDate, formatTime } from '@/lib/utils'
 import { ChevronLeft, ChevronRight, Video, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { CancelarClaseDialog } from './CancelarClaseDialog'
+import { HORAS_MINIMAS_CANCELACION } from '@/lib/constants'
 
 interface Clase {
   id: string
@@ -26,6 +28,7 @@ export function CalendarioClases({ clases, zoomLink }: CalendarioClasesProps) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [joiningClass, setJoiningClass] = useState<string | null>(null)
+  const [cancelClase, setCancelClase] = useState<Clase | null>(null)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -86,6 +89,14 @@ export function CalendarioClases({ clases, zoomLink }: CalendarioClasesProps) {
     return ahora >= fechaInicio && ahora <= fechaFin && clase.estado === 'programada'
   }
 
+  function puedeCancelar(clase: Clase): boolean {
+    if (clase.estado !== 'programada') return false
+    const ahora = new Date()
+    const fechaInicio = new Date(clase.fecha + 'T' + clase.hora_inicio)
+    const horasRestantes = (fechaInicio.getTime() - ahora.getTime()) / (1000 * 60 * 60)
+    return horasRestantes >= HORAS_MINIMAS_CANCELACION
+  }
+
   async function handleJoinClass(clase: Clase) {
     setJoiningClass(clase.id)
 
@@ -106,7 +117,7 @@ export function CalendarioClases({ clases, zoomLink }: CalendarioClasesProps) {
         return
       }
 
-      toast.success('Clase marcada como completada')
+      toast.success('Conectando a la clase')
       const link = data.zoom_link || zoomLink
       if (link) {
         window.open(link, '_blank')
@@ -232,6 +243,16 @@ export function CalendarioClases({ clases, zoomLink }: CalendarioClasesProps) {
                     <Video className="h-4 w-4 mr-1" />
                     {joiningClass === clase.id ? 'Conectando...' : 'Unirse'}
                   </Button>
+                ) : puedeCancelar(clase) ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                    onClick={() => setCancelClase(clase)}
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Cancelar
+                  </Button>
                 ) : (
                   <Badge variant="secondary">Programada</Badge>
                 )}
@@ -244,6 +265,14 @@ export function CalendarioClases({ clases, zoomLink }: CalendarioClasesProps) {
           )}
         </div>
       </div>
+
+      {cancelClase && (
+        <CancelarClaseDialog
+          open={!!cancelClase}
+          onOpenChange={(open) => { if (!open) setCancelClase(null) }}
+          clase={cancelClase}
+        />
+      )}
     </div>
   )
 }

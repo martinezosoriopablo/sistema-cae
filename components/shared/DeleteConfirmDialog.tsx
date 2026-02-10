@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { AlertTriangle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface DeleteConfirmDialogProps {
   open: boolean
@@ -47,7 +48,7 @@ export function DeleteConfirmDialog({
       setInputValue('')
       onOpenChange(false)
     } catch (error) {
-      // El error se maneja en el componente padre
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar')
     } finally {
       setIsLoading(false)
     }

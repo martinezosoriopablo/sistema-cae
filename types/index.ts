@@ -10,6 +10,9 @@ export type EstadoClase = 'programada' | 'completada' | 'cancelada' | 'no_asisti
 // Días de la semana
 export type DiaSemana = 'lunes' | 'martes' | 'miercoles' | 'jueves' | 'viernes' | 'sabado' | 'domingo'
 
+// Modalidades de curso
+export type ModalidadCurso = 'privado' | 'livemode' | 'kids' | 'presencial' | 'espanol' | 'nativo'
+
 // Usuario base (de Supabase Auth)
 export interface Usuario {
   id: string
@@ -61,6 +64,7 @@ export interface Alumno {
   telefono: string
   rut?: string
   nivel_actual: NivelMCER
+  modalidad: ModalidadCurso
   horas_contratadas: number
   horas_restantes: number
   profesor_id?: string
@@ -164,6 +168,7 @@ export interface NuevoAlumnoForm {
   telefono: string
   rut?: string
   nivel_actual: NivelMCER
+  modalidad: ModalidadCurso
   horas_contratadas: number
   horarios: {
     dia: DiaSemana

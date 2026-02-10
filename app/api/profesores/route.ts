@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { nuevoProfesorSchema } from '@/lib/validations'
+import { generateTempPassword } from '@/lib/auth-utils'
 import { sendEmail, getWelcomeEmail } from '@/lib/email'
 
 export async function GET() {
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Crear usuario en Supabase Auth
-    const tempPassword = Math.random().toString(36).slice(-8) + 'A1!'
+    const tempPassword = generateTempPassword()
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: data.email,

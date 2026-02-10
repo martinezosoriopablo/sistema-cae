@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { UserPlus, Loader2, Download, Upload } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { Alumno } from '@/types'
 
 export default function AlumnosPage() {
@@ -33,7 +34,7 @@ export default function AlumnosPage() {
         setAlumnos(data)
       }
     } catch (error) {
-      console.error('Error fetching alumnos:', error)
+      toast.error('Error al cargar los alumnos')
     } finally {
       setLoading(false)
     }

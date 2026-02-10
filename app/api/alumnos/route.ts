@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { nuevoAlumnoSchema } from '@/lib/validations'
 import { calcularDuracion } from '@/lib/utils'
-import { sendEmail, getWelcomeEmail } from '@/lib/email'
+import { generateTempPassword } from '@/lib/auth-utils'
+import { sendEmail, getWelcomeAlumnoEmail } from '@/lib/email'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Crear usuario en Supabase Auth
-    const tempPassword = Math.random().toString(36).slice(-8) + 'A1!'
+    const tempPassword = generateTempPassword()
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email: data.email,
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
         telefono: data.telefono,
         rut: data.rut || null,
         nivel_actual: data.nivel_actual,
+        modalidad: data.modalidad,
         horas_contratadas: data.horas_contratadas,
         horas_restantes: data.horas_contratadas,
         vendedor_id: user.id,
@@ -146,16 +148,26 @@ export async function POST(request: NextRequest) {
       console.error('Error al crear horarios:', horariosError)
     }
 
-    // Enviar email de bienvenida con credenciales
+    // Enviar email de bienvenida con credenciales y carta según modalidad
     const portalUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sistema-cae.onrender.com'
+    const modalidadLabels: Record<string, string> = {
+      privado: 'Privado',
+      livemode: 'LiveMode',
+      kids: 'Kids',
+      presencial: 'Presencial Privado',
+      espanol: 'Español',
+      nativo: 'Nativo',
+    }
     sendEmail({
       to: data.email,
-      subject: '¡Bienvenido a TalkChile! - Tus credenciales de acceso',
-      html: getWelcomeEmail({
+      subject: `Bienvenida TalkChile Curso ${modalidadLabels[data.modalidad] || 'Privado'}`,
+      html: getWelcomeAlumnoEmail({
         nombre: data.nombre,
         email: data.email,
         password: tempPassword,
-        rol: 'alumno',
+        modalidad: data.modalidad,
+        nivelActual: data.nivel_actual,
+        horasContratadas: data.horas_contratadas,
         portalUrl: `${portalUrl}/login`,
       }),
     }).catch(err => console.error('Error al enviar email de bienvenida:', err))

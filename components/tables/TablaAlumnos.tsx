@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Eye, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
-import { UMBRAL_ALERTA_HORAS } from '@/lib/constants'
+import { MODALIDADES_CURSO, UMBRAL_ALERTA_HORAS } from '@/lib/constants'
 
 interface TablaAlumnosProps {
   alumnos: Alumno[]
@@ -37,6 +37,7 @@ export function TablaAlumnos({
             <TableHead>Alumno</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Nivel</TableHead>
+            <TableHead>Modalidad</TableHead>
             <TableHead>Horas</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead className="text-right">Acciones</TableHead>
@@ -45,7 +46,7 @@ export function TablaAlumnos({
         <TableBody>
           {alumnos.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                 No hay alumnos para mostrar
               </TableCell>
             </TableRow>
@@ -63,6 +64,11 @@ export function TablaAlumnos({
                 <TableCell>{alumno.email}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{alumno.nivel_actual}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {MODALIDADES_CURSO.find(m => m.value === alumno.modalidad)?.label || alumno.modalidad}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { DiaSemana, EstadoClase, NivelMCER, Rol } from '@/types'
+import { DiaSemana, EstadoClase, ModalidadCurso, NivelMCER, Rol } from '@/types'
 
 // Roles del sistema
 export const ROLES: { value: Rol; label: string }[] = [
@@ -37,6 +37,16 @@ export const DIAS_SEMANA: { value: DiaSemana; label: string; abrev: string }[] =
   { value: 'domingo', label: 'Domingo', abrev: 'Dom' },
 ]
 
+// Modalidades de curso
+export const MODALIDADES_CURSO: { value: ModalidadCurso; label: string; tarifaSugerida: number }[] = [
+  { value: 'privado', label: 'Privado', tarifaSugerida: 15000 },
+  { value: 'livemode', label: 'Livemode', tarifaSugerida: 12000 },
+  { value: 'kids', label: 'Kids', tarifaSugerida: 15000 },
+  { value: 'presencial', label: 'Presencial', tarifaSugerida: 20000 },
+  { value: 'espanol', label: 'Español', tarifaSugerida: 12000 },
+  { value: 'nativo', label: 'Nativo', tarifaSugerida: 18000 },
+]
+
 // Horarios disponibles (cada 30 minutos)
 export const HORARIOS_DISPONIBLES = Array.from({ length: 28 }, (_, i) => {
   const hour = Math.floor(i / 2) + 7 // Empezar a las 7:00
@@ -56,6 +66,9 @@ export const DURACIONES_CLASE = [
 
 // Umbral de alerta de pocas horas
 export const UMBRAL_ALERTA_HORAS = 5
+
+// Horas mínimas de anticipación para cancelar una clase (12, 18 o 24)
+export const HORAS_MINIMAS_CANCELACION = 24
 
 // Rutas por rol
 export const RUTAS_POR_ROL: Record<Rol, string> = {

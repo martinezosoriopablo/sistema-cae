@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseAlumnosExcel, AlumnoExcelRow } from '@/lib/excel-parser'
+import { generateTempPassword } from '@/lib/auth-utils'
 
 interface ResultadoCarga {
   exitosos: { email: string; nombre: string }[]
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 
       try {
         // Crear usuario en Supabase Auth
-        const tempPassword = Math.random().toString(36).slice(-8) + 'A1!'
+        const tempPassword = generateTempPassword()
 
         const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
           email: alumno.email,
@@ -122,6 +123,7 @@ export async function POST(request: NextRequest) {
             telefono: alumno.telefono,
             rut: alumno.rut || null,
             nivel_actual: alumno.nivel_actual || 'A1',
+            modalidad: alumno.modalidad || 'privado',
             horas_contratadas: alumno.horas_contratadas || 10,
             horas_restantes: alumno.horas_contratadas || 10,
             vendedor_id: user.id,

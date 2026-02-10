@@ -71,7 +71,7 @@ export function FormEditarHorarios({ alumnoId, onSuccess, onCancel }: FormEditar
           }
         }
       } catch (error) {
-        console.error('Error fetching horarios:', error)
+        toast.error('Error al cargar los horarios')
       } finally {
         setInitialLoading(false)
       }

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatHorasRestantes } from '@/lib/utils'
 import { DIAS_SEMANA, UMBRAL_ALERTA_HORAS } from '@/lib/constants'
 import { Mail, Phone, AlertTriangle } from 'lucide-react'
+import { HorarioAlumno } from '@/types'
 
 export default async function MisAlumnosProfesorPage() {
   const session = await requireRole(['profesor'])
@@ -83,8 +84,8 @@ export default async function MisAlumnosProfesorPage() {
                       <p className="text-sm font-medium mb-2">Horarios:</p>
                       <div className="flex flex-wrap gap-2">
                         {alumno.horarios
-                          .filter((h: any) => h.activo)
-                          .map((horario: any) => {
+                          .filter((h: HorarioAlumno) => h.activo)
+                          .map((horario: HorarioAlumno) => {
                             const dia = DIAS_SEMANA.find(d => d.value === horario.dia)
                             return (
                               <Badge key={horario.id} variant="outline">

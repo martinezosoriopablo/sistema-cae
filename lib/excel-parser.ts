@@ -16,6 +16,7 @@ export interface AlumnoExcelRow {
   telefono: string
   rut?: string
   nivel_actual?: string
+  modalidad?: string
   horas_contratadas?: number
 }
 
@@ -24,7 +25,7 @@ export interface ProfesorExcelRow {
   apellido: string
   email: string
   telefono?: string
-  especialidades?: string
+  especialidades?: string[]
   zoom_link?: string
 }
 
@@ -70,6 +71,7 @@ export function parseAlumnosExcel(buffer: ArrayBuffer): ParseResult<AlumnoExcelR
       telefono: String(row.telefono || '').trim(),
       rut: row.rut ? String(row.rut).trim() : undefined,
       nivel_actual: row.nivel_actual ? String(row.nivel_actual).toUpperCase().trim() : 'A1',
+      modalidad: row.modalidad ? String(row.modalidad).toLowerCase().trim() : 'privado',
       horas_contratadas: row.horas_contratadas ? Number(row.horas_contratadas) : 10,
     }
 
@@ -102,12 +104,18 @@ export function parseProfesoresExcel(buffer: ArrayBuffer): ParseResult<ProfesorE
   rows.forEach((row, index) => {
     const filaNumero = index + 2
 
+    // Convertir especialidades de string "A1,B1,C1" a array ["A1","B1","C1"]
+    const especialidadesRaw = row.especialidades ? String(row.especialidades).trim() : undefined
+    const especialidades = especialidadesRaw
+      ? especialidadesRaw.split(',').map((e: string) => e.trim().toUpperCase())
+      : undefined
+
     const normalizedRow = {
       nombre: String(row.nombre || '').trim(),
       apellido: String(row.apellido || '').trim(),
       email: String(row.email || '').trim().toLowerCase(),
       telefono: row.telefono ? String(row.telefono).trim() : undefined,
-      especialidades: row.especialidades ? String(row.especialidades).trim() : undefined,
+      especialidades,
       zoom_link: row.zoom_link ? String(row.zoom_link).trim() : undefined,
     }
 
@@ -137,8 +145,8 @@ export function generateExcelTemplate(type: 'alumnos' | 'profesores'): ArrayBuff
 
   if (type === 'alumnos') {
     const headers = [
-      ['nombre', 'apellido', 'email', 'telefono', 'rut', 'nivel_actual', 'horas_contratadas'],
-      ['Juan', 'Perez', 'juan@email.com', '+56912345678', '12.345.678-9', 'A1', 10],
+      ['nombre', 'apellido', 'email', 'telefono', 'rut', 'nivel_actual', 'modalidad', 'horas_contratadas'],
+      ['Juan', 'Perez', 'juan@email.com', '+56912345678', '12.345.678-9', 'A1', 'privado', 10],
     ]
     const ws = XLSX.utils.aoa_to_sheet(headers)
     XLSX.utils.book_append_sheet(wb, ws, 'Alumnos')

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { actualizarProfesorSchema } from '@/lib/validations'
 
 export async function GET(
   request: NextRequest,
@@ -54,11 +55,19 @@ export async function PUT(
   }
 
   const body = await request.json()
+  const validated = actualizarProfesorSchema.safeParse(body)
+
+  if (!validated.success) {
+    return NextResponse.json(
+      { error: validated.error.issues[0].message },
+      { status: 400 }
+    )
+  }
 
   const { data: profesor, error } = await supabase
     .from('profesores')
     .update({
-      ...body,
+      ...validated.data,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import twilio from 'twilio'
 
 interface WhatsAppRequest {
@@ -19,6 +20,29 @@ const templates: Record<string, (data: Record<string, string>) => string> = {
 }
 
 export async function POST(request: NextRequest) {
+  // Verificar autorización (cron o usuario admin autenticado)
+  const authHeader = request.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData || userData.rol !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
+  }
+
   // Verificar configuración
   if (
     !process.env.TWILIO_ACCOUNT_SID ||

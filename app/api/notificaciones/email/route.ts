@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -53,14 +54,27 @@ const templates: Record<string, (data: Record<string, string>) => string> = {
 }
 
 export async function POST(request: NextRequest) {
-  // Verificar API key
+  // Verificar autorización (cron o usuario admin autenticado)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  // Permitir llamadas internas o con CRON_SECRET
-  if (authHeader !== `Bearer ${cronSecret}` && !request.headers.get('x-internal-call')) {
-    // Verificar autenticación de usuario
-    // Por simplicidad, permitimos cualquier llamada interna
+  if (authHeader !== `Bearer ${cronSecret}`) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+
+    if (!userData || userData.rol !== 'admin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+    }
   }
 
   if (!process.env.RESEND_API_KEY) {

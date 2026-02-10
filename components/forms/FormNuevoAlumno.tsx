@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { nuevoAlumnoSchema, NuevoAlumnoInput } from '@/lib/validations'
-import { NIVELES_MCER, DIAS_SEMANA, HORARIOS_DISPONIBLES } from '@/lib/constants'
+import { NIVELES_MCER, MODALIDADES_CURSO, DIAS_SEMANA, HORARIOS_DISPONIBLES } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -63,6 +63,7 @@ export function FormNuevoAlumno({ redirectUrl = '/vendedor/mis-alumnos', onSucce
       telefono: '',
       rut: '',
       nivel_actual: 'A1',
+      modalidad: 'privado',
       horas_contratadas: 10,
       horarios: [{ dia: 'lunes', hora_inicio: '09:00', hora_fin: '10:00' }],
     },
@@ -238,6 +239,39 @@ export function FormNuevoAlumno({ redirectUrl = '/vendedor/mis-alumnos', onSucce
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <FormField
+              control={form.control}
+              name="modalidad"
+              render={({ field }) => {
+                const modalidadInfo = MODALIDADES_CURSO.find(m => m.value === field.value)
+                return (
+                  <FormItem>
+                    <FormLabel>Modalidad</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona modalidad" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {MODALIDADES_CURSO.map((modalidad) => (
+                          <SelectItem key={modalidad.value} value={modalidad.value}>
+                            {modalidad.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {modalidadInfo && (
+                      <p className="text-xs text-muted-foreground">
+                        Tarifa sugerida: ${modalidadInfo.tarifaSugerida.toLocaleString('es-CL')}/hora
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
 
             <FormField
