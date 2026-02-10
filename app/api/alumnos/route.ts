@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { nuevoAlumnoSchema } from '@/lib/validations'
 import { calcularDuracion } from '@/lib/utils'
+import { sendEmail, getWelcomeEmail } from '@/lib/email'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -144,6 +145,20 @@ export async function POST(request: NextRequest) {
     if (horariosError) {
       console.error('Error al crear horarios:', horariosError)
     }
+
+    // Enviar email de bienvenida con credenciales
+    const portalUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sistema-cae.onrender.com'
+    sendEmail({
+      to: data.email,
+      subject: '¡Bienvenido a TalkChile! - Tus credenciales de acceso',
+      html: getWelcomeEmail({
+        nombre: data.nombre,
+        email: data.email,
+        password: tempPassword,
+        rol: 'alumno',
+        portalUrl: `${portalUrl}/login`,
+      }),
+    }).catch(err => console.error('Error al enviar email de bienvenida:', err))
 
     return NextResponse.json({
       alumno,

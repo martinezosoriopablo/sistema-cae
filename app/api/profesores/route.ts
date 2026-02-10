@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { nuevoProfesorSchema } from '@/lib/validations'
+import { sendEmail, getWelcomeEmail } from '@/lib/email'
 
 export async function GET() {
   const supabase = await createClient()
@@ -112,6 +113,20 @@ export async function POST(request: NextRequest) {
       await adminClient.auth.admin.deleteUser(authData.user.id)
       throw profesorError
     }
+
+    // Enviar email de bienvenida con credenciales
+    const portalUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sistema-cae.onrender.com'
+    sendEmail({
+      to: data.email,
+      subject: '¡Bienvenido a TalkChile! - Tus credenciales de acceso',
+      html: getWelcomeEmail({
+        nombre: data.nombre,
+        email: data.email,
+        password: tempPassword,
+        rol: 'profesor',
+        portalUrl: `${portalUrl}/login`,
+      }),
+    }).catch(err => console.error('Error al enviar email de bienvenida:', err))
 
     return NextResponse.json({
       profesor,
