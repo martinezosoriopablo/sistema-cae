@@ -38,13 +38,13 @@ export const DIAS_SEMANA: { value: DiaSemana; label: string; abrev: string }[] =
 ]
 
 // Modalidades de curso
-export const MODALIDADES_CURSO: { value: ModalidadCurso; label: string; tarifaSugerida: number }[] = [
-  { value: 'privado', label: 'Privado', tarifaSugerida: 15000 },
-  { value: 'livemode', label: 'Livemode', tarifaSugerida: 12000 },
-  { value: 'kids', label: 'Kids', tarifaSugerida: 15000 },
-  { value: 'presencial', label: 'Presencial', tarifaSugerida: 20000 },
-  { value: 'espanol', label: 'Español', tarifaSugerida: 12000 },
-  { value: 'nativo', label: 'Nativo', tarifaSugerida: 18000 },
+export const MODALIDADES_CURSO: { value: ModalidadCurso; label: string; tarifaSugerida: number | null }[] = [
+  { value: 'privado', label: 'Privado', tarifaSugerida: null },
+  { value: 'livemode', label: 'Livemode', tarifaSugerida: null },
+  { value: 'kids', label: 'Kids', tarifaSugerida: null },
+  { value: 'presencial', label: 'Presencial', tarifaSugerida: null },
+  { value: 'espanol', label: 'Español', tarifaSugerida: null },
+  { value: 'nativo', label: 'Nativo', tarifaSugerida: null },
 ]
 
 // Horarios disponibles (cada 30 minutos)

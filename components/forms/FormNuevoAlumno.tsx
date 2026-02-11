@@ -265,7 +265,9 @@ export function FormNuevoAlumno({ redirectUrl = '/vendedor/mis-alumnos', onSucce
                     </Select>
                     {modalidadInfo && (
                       <p className="text-xs text-muted-foreground">
-                        Tarifa sugerida: ${modalidadInfo.tarifaSugerida.toLocaleString('es-CL')}/hora
+                        Tarifa sugerida: {modalidadInfo.tarifaSugerida
+                          ? `$${modalidadInfo.tarifaSugerida.toLocaleString('es-CL')}/hora`
+                          : 'Por definir'}
                       </p>
                     )}
                     <FormMessage />
