@@ -129,6 +129,21 @@ CREATE TABLE materiales (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tabla de materiales por alumno (subidos por profesor)
+CREATE TABLE materiales_alumno (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  alumno_id UUID NOT NULL REFERENCES alumnos(id) ON DELETE CASCADE,
+  profesor_id UUID NOT NULL REFERENCES profesores(id) ON DELETE CASCADE,
+  titulo TEXT NOT NULL,
+  descripcion TEXT,
+  tipo tipo_material NOT NULL DEFAULT 'documento',
+  url TEXT NOT NULL,
+  es_archivo BOOLEAN NOT NULL DEFAULT FALSE,
+  archivo_nombre TEXT,
+  archivo_tamano INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Tabla de pagos
 CREATE TABLE pagos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -179,6 +194,9 @@ CREATE INDEX idx_alertas_destinatario_leida ON alertas(destinatario_id, leida);
 
 CREATE INDEX idx_materiales_nivel ON materiales(nivel);
 
+CREATE INDEX idx_materiales_alumno_alumno ON materiales_alumno(alumno_id);
+CREATE INDEX idx_materiales_alumno_profesor ON materiales_alumno(profesor_id);
+
 CREATE INDEX idx_pagos_alumno ON pagos(alumno_id);
 CREATE INDEX idx_pagos_vendedor ON pagos(vendedor_id);
 
@@ -194,6 +212,7 @@ ALTER TABLE cambios_transitorios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clases ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alertas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE materiales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE materiales_alumno ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pagos ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para usuarios
@@ -270,6 +289,22 @@ CREATE POLICY "Cualquier autenticado puede ver materiales" ON materiales
   FOR SELECT USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Admin puede gestionar materiales" ON materiales
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM usuarios WHERE id = auth.uid() AND rol = 'admin')
+  );
+
+-- Políticas para materiales_alumno
+CREATE POLICY "Profesor gestiona sus materiales" ON materiales_alumno
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM profesores WHERE id = materiales_alumno.profesor_id AND user_id = auth.uid())
+  );
+
+CREATE POLICY "Alumno ve sus materiales" ON materiales_alumno
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM alumnos WHERE id = materiales_alumno.alumno_id AND user_id = auth.uid())
+  );
+
+CREATE POLICY "Admin gestiona todos los materiales de alumno" ON materiales_alumno
   FOR ALL USING (
     EXISTS (SELECT 1 FROM usuarios WHERE id = auth.uid() AND rol = 'admin')
   );

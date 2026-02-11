@@ -1,10 +1,12 @@
 import { requireRole } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BookOpen, FileText, Video, Headphones, PenTool, ExternalLink } from 'lucide-react'
+import { MaterialAlumnoSection } from './MaterialAlumnoSection'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   documento: FileText,
@@ -16,10 +18,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export default async function MaterialPage() {
   const session = await requireRole(['alumno'])
   const supabase = await createClient()
+  const adminClient = createAdminClient()
 
   const { data: alumno } = await supabase
     .from('alumnos')
-    .select('nivel_actual')
+    .select('id, nivel_actual')
     .eq('user_id', session.id)
     .single()
 
@@ -38,6 +41,13 @@ export default async function MaterialPage() {
     .in('nivel', nivelesPermitidos)
     .order('nivel')
     .order('titulo')
+
+  // Obtener materiales personalizados del profesor
+  const { data: materialesProfesor } = await adminClient
+    .from('materiales_alumno')
+    .select('*')
+    .eq('alumno_id', alumno.id)
+    .order('created_at', { ascending: false })
 
   // Agrupar por nivel
   type MaterialItem = NonNullable<typeof materiales>[number]
@@ -58,6 +68,12 @@ export default async function MaterialPage() {
         </p>
       </div>
 
+      {/* Material personalizado del profesor */}
+      {materialesProfesor && materialesProfesor.length > 0 && (
+        <MaterialAlumnoSection materiales={materialesProfesor} />
+      )}
+
+      {/* Material global por nivel */}
       {Object.keys(materialesPorNivel).length > 0 ? (
         <Tabs defaultValue={alumno.nivel_actual}>
           <TabsList className="w-full justify-start overflow-x-auto">
@@ -138,15 +154,17 @@ export default async function MaterialPage() {
 
         </Tabs>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">No hay material disponible</p>
-            <p className="text-muted-foreground">
-              El material de estudio se agregará próximamente
-            </p>
-          </CardContent>
-        </Card>
+        !materialesProfesor?.length && (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-lg font-medium">No hay material disponible</p>
+              <p className="text-muted-foreground">
+                El material de estudio se agregará próximamente
+              </p>
+            </CardContent>
+          </Card>
+        )
       )}
     </div>
   )

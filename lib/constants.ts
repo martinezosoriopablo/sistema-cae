@@ -99,6 +99,7 @@ export const MENU_POR_ROL: Record<Rol, { label: string; href: string; icon: stri
     { label: 'Dashboard', href: '/profesor', icon: 'LayoutDashboard' },
     { label: 'Clases Hoy', href: '/profesor/clases-hoy', icon: 'Calendar' },
     { label: 'Mis Alumnos', href: '/profesor/mis-alumnos', icon: 'Users' },
+    { label: 'Materiales', href: '/profesor/materiales', icon: 'BookOpen' },
   ],
   alumno: [
     { label: 'Dashboard', href: '/alumno', icon: 'LayoutDashboard' },

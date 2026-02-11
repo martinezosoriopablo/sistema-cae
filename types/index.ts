@@ -146,6 +146,21 @@ export interface Material {
   created_at: string
 }
 
+// Material de alumno (subido por profesor)
+export interface MaterialAlumno {
+  id: string
+  alumno_id: string
+  profesor_id: string
+  titulo: string
+  descripcion?: string
+  tipo: 'documento' | 'video' | 'audio' | 'ejercicio'
+  url: string
+  es_archivo: boolean
+  archivo_nombre?: string
+  archivo_tamano?: number
+  created_at: string
+}
+
 // Pago
 export interface Pago {
   id: string

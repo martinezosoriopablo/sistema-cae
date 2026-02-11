@@ -128,6 +128,15 @@ export const filaProfesorExcelSchema = z.object({
   zoom_link: z.string().url().optional(),
 })
 
+// Validación de nuevo material de alumno
+export const nuevoMaterialAlumnoSchema = z.object({
+  alumno_id: z.string().uuid('ID de alumno inválido'),
+  titulo: z.string().min(2, 'El título debe tener al menos 2 caracteres').max(200, 'El título no puede exceder 200 caracteres'),
+  descripcion: z.string().max(500, 'La descripción no puede exceder 500 caracteres').optional(),
+  tipo: z.enum(['documento', 'video', 'audio', 'ejercicio']),
+  url: z.string().url('URL inválida').optional(),
+})
+
 // Tipos inferidos
 export type LoginInput = z.infer<typeof loginSchema>
 export type NuevoAlumnoInput = z.infer<typeof nuevoAlumnoSchema>
@@ -143,3 +152,4 @@ export type ActualizarHorariosInput = z.infer<typeof actualizarHorariosSchema>
 export type AgregarHorasInput = z.infer<typeof agregarHorasSchema>
 export type FilaAlumnoExcelInput = z.infer<typeof filaAlumnoExcelSchema>
 export type FilaProfesorExcelInput = z.infer<typeof filaProfesorExcelSchema>
+export type NuevoMaterialAlumnoInput = z.infer<typeof nuevoMaterialAlumnoSchema>
