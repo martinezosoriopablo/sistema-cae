@@ -16,7 +16,7 @@ export async function GET() {
   // Verificar que es admin
   const { data: userData } = await supabase
     .from('usuarios')
-    .select('rol')
+    .select('rol, super_admin')
     .eq('id', user.id)
     .single()
 
@@ -46,15 +46,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  // Verificar que es admin
+  // Verificar que es super admin
   const { data: userData } = await supabase
     .from('usuarios')
-    .select('rol')
+    .select('rol, super_admin')
     .eq('id', user.id)
     .single()
 
-  if (!userData || userData.rol !== 'admin') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!userData || userData.rol !== 'admin' || !userData.super_admin) {
+    return NextResponse.json({ error: 'Solo el super administrador puede crear otros administradores' }, { status: 403 })
   }
 
   const body = await request.json()

@@ -17,6 +17,15 @@ export default async function AdministradoresPage() {
   await requireRole(['admin'])
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: currentUser } = await supabase
+    .from('usuarios')
+    .select('super_admin')
+    .eq('id', user!.id)
+    .single()
+
+  const esSuperAdmin = currentUser?.super_admin === true
+
   const { data: admins } = await supabase
     .from('usuarios')
     .select('*')
@@ -32,7 +41,7 @@ export default async function AdministradoresPage() {
             {admins?.length || 0} administradores registrados
           </p>
         </div>
-        <FormNuevoAdministrador />
+        {esSuperAdmin && <FormNuevoAdministrador />}
       </div>
 
       <Card>
