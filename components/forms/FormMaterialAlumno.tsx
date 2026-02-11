@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { nuevoMaterialAlumnoSchema, NuevoMaterialAlumnoInput } from '@/lib/validations'
@@ -55,6 +55,11 @@ export function FormMaterialAlumno({ alumnoId, open, onOpenChange, onSuccess }: 
       url: '',
     },
   })
+
+  // Actualizar alumno_id cuando cambia el alumno seleccionado
+  useEffect(() => {
+    form.setValue('alumno_id', alumnoId)
+  }, [alumnoId, form])
 
   function handleReset() {
     form.reset({
