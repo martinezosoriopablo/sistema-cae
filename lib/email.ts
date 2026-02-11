@@ -16,7 +16,7 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'TalkChile <onboarding@resend.dev>', // Cambiar a noreply@tudominio.cl cuando verifiques dominio
+      from: 'LiveMode TalkChile <livemode@talkchile.cl>',
       to,
       subject,
       html,
