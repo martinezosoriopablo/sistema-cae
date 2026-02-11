@@ -38,7 +38,7 @@ export function getWelcomeEmail(params: {
   nombre: string
   email: string
   password: string
-  rol: 'alumno' | 'profesor' | 'vendedor'
+  rol: 'alumno' | 'profesor' | 'vendedor' | 'admin'
   portalUrl: string
 }) {
   const { nombre, email, password, rol, portalUrl } = params
@@ -47,12 +47,14 @@ export function getWelcomeEmail(params: {
     alumno: 'Alumno',
     profesor: 'Profesor',
     vendedor: 'Vendedor',
+    admin: 'Administrador',
   }
 
   const rolDescriptions = {
     alumno: 'Podrás ver tus clases programadas, unirte a las sesiones de Zoom y acceder a material de estudio.',
     profesor: 'Podrás ver tus clases del día, marcar asistencia y gestionar a tus alumnos.',
     vendedor: 'Podrás registrar nuevos alumnos y hacer seguimiento de sus horas.',
+    admin: 'Tendrás acceso completo al sistema: gestión de alumnos, profesores, vendedores, horarios y reportes.',
   }
 
   return `

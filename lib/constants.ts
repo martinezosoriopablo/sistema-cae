@@ -85,6 +85,7 @@ export const MENU_POR_ROL: Record<Rol, { label: string; href: string; icon: stri
     { label: 'Alumnos', href: '/admin/alumnos', icon: 'Users' },
     { label: 'Profesores', href: '/admin/profesores', icon: 'GraduationCap' },
     { label: 'Vendedores', href: '/admin/vendedores', icon: 'UserPlus' },
+    { label: 'Administradores', href: '/admin/administradores', icon: 'Shield' },
     { label: 'Horarios', href: '/admin/horarios', icon: 'Calendar' },
     { label: 'Reportes', href: '/admin/reportes', icon: 'BarChart' },
   ],

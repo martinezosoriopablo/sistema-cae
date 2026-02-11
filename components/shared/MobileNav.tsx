@@ -17,6 +17,7 @@ import {
   Video,
   History,
   BookOpen,
+  Shield,
   X,
   User,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Video,
   History,
   BookOpen,
+  Shield,
 }
 
 interface MobileNavProps {

@@ -17,6 +17,7 @@ import {
   Video,
   History,
   BookOpen,
+  Shield,
 } from 'lucide-react'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -30,6 +31,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Video,
   History,
   BookOpen,
+  Shield,
 }
 
 interface SidebarProps {
