@@ -134,7 +134,7 @@ export const nuevoMaterialAlumnoSchema = z.object({
   titulo: z.string().min(2, 'El título debe tener al menos 2 caracteres').max(200, 'El título no puede exceder 200 caracteres'),
   descripcion: z.string().max(500, 'La descripción no puede exceder 500 caracteres').optional(),
   tipo: z.enum(['documento', 'video', 'audio', 'ejercicio']),
-  url: z.string().url('URL inválida').optional(),
+  url: z.string().url('URL inválida').optional().or(z.literal('')),
 })
 
 // Tipos inferidos
